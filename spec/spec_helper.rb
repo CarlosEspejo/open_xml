@@ -1,3 +1,5 @@
-require 'turn/autorun'
+require 'minitest/autorun'
+require 'minitest/pride'
+require 'open_xml'
 
-Turn.config.format = :outline
+include OpenXml

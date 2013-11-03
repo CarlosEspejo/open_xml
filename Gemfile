@@ -1,7 +1,10 @@
 source 'https://rubygems.org'
 
 gem 'minitest'
-gem 'turn'
 gem 'rake'
 gem 'nokogiri'
-#gem 'pry'
+gem 'rubyzip'
+
+group :development do
+  gem 'pry'
+end
