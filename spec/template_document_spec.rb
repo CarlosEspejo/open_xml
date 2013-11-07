@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'tempfile'
-require 'digest/md5'
+require 'nokogiri'
 
 describe TemplateDocument do
 
@@ -23,9 +23,11 @@ describe TemplateDocument do
 
   end
 
-  it "should replace key words and create new document" do
-    t = TemplateDocument.new(path: template_path)
-    skip
+  it "should replace key words in the document xml" do
+    t = TemplateDocument.new(path: template_path, data: {"NAME" => "Steve Jobs"})
+    t.process
+    doc = Nokogiri::XML(t.parts["word/document.xml"])
+    doc.xpath('//w:t').text[/Steve Jobs/].must_equal "Steve Jobs"
   end
   
   let(:template_path){"#{File.expand_path('samples', File.dirname(__FILE__))}/template_sample.docx"}
