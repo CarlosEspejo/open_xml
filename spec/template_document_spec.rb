@@ -24,10 +24,17 @@ describe TemplateDocument do
   end
 
   it "should replace key words in the document xml" do
-    t = TemplateDocument.new(path: template_path, data: {"NAME" => "Steve Jobs"})
+    temp = Tempfile.new(['output','.docx'])
+
+    t = TemplateDocument.new(path: template_path, data: {"[NAME]" => "<b>Carlos</b>", "[AGE]" => 30 })
     t.process
-    doc = Nokogiri::XML(t.parts["word/document.xml"])
-    doc.xpath('//w:t').text[/Steve Jobs/].must_equal "Steve Jobs"
+    IO.write temp.path, t.to_zip_buffer.string
+
+    processed = TemplateDocument.new(path: temp.path)
+    doc = Nokogiri::XML(processed.parts["word/document.xml"])
+
+    doc.xpath('//w:t').text[/\[NAME\]/].must_be_nil
+    doc.xpath('//w:t').text[/\[AGE\]/].must_be_nil
   end
   
   let(:template_path){"#{File.expand_path('samples', File.dirname(__FILE__))}/template_sample.docx"}
