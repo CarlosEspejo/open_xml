@@ -1,4 +1,5 @@
 require 'zip'
+require 'nokogiri'
 
 module OpenXml
 
