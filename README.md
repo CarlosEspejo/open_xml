@@ -8,14 +8,10 @@ Library for reading and writing to open xml documents (*but at the moment you ca
 * nokogiri
     
 ## Usage
-Provide a path to a docx with the word [SUPERPOWER] placed anywhere.
+download lib and bin directories
+
 ```ruby
-require 'open_xml'
-
-doc = OpenXml::TemplateDocument.new(path: "[path to template]", data: {"[SUPERPOWER]" => "Bug Fixing!!!!"})
-doc.process
-
-IO.write "./powers.docx", doc.to_zip_buffer.string
+ruby sample.rb
 ```
 
 ## Todo
