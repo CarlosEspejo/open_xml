@@ -1,13 +1,22 @@
 open_xml
 ========
 
-Library for reading and writing to open xml documents
+Library for reading and writing to open xml documents (*but at the moment you can generate word docs from a template*)
 
-## Installation
-    coming soon
+## Requirements
+* rubyzip
+* nokogiri
     
 ## Usage
-    coming soon
+Provide a path to a docx with the word [SUPERPOWER] placed anywhere.
+```ruby
+require 'open_xml'
+
+doc = OpenXml::TemplateDocument.new(path: "[path to template]", data: {"[SUPERPOWER]" => "Bug Fixing!!!!"})
+doc.process
+
+IO.write "./powers.docx", doc.to_zip_buffer.string
+```
 
 ## Todo
   * ~~Implement reading and writing the word zip files~~
