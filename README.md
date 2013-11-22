@@ -10,6 +10,9 @@ Library for reading and writing to open xml documents
     coming soon
 
 ## Todo
-  * ~~implement reading and writing the word zip files~~
-  * ~~create a template word document with formatted key words (bold, 14pt).~~
-  * replace the key words with the supplied plain text content but maintain all the formatting.
+  * ~~Implement reading and writing the word zip files~~
+  * ~~Create a template word document with formatted key words (bold, 14pt).~~
+  * ~~Replace the key words with the supplied plain text content but maintain all the formatting.~~
+  * ~~Handle replacing a key with multiple content~~
+  * Format html content for wordprocessingML e.x. bold, italic,
+    underline

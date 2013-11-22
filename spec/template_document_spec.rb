@@ -36,7 +36,27 @@ describe TemplateDocument do
     doc.xpath('//w:t').text[/\[NAME\]/].must_be_nil
     doc.xpath('//w:t').text[/\[AGE\]/].must_be_nil
   end
-  
+
+  it "should replace one key word with many items" do
+    data = {
+      "[LIST]" => [
+                    "list 1",
+                    "list 2",
+                    "list 3",
+                    "list 4",
+                    "list 5"
+                  ]
+    }
+
+    t = TemplateDocument.new(path: template_path, data: data)
+    t.process
+    doc = Nokogiri::XML(t.parts["word/document.xml"])
+
+    text = doc.xpath('//w:t').text
+
+    text[/list 1\nlist 2/].wont_be_nil
+  end
+
   let(:template_path){"#{File.expand_path('samples', File.dirname(__FILE__))}/template_sample.docx"}
 
   let(:template_parts) do

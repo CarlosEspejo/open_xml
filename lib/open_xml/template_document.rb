@@ -26,7 +26,7 @@ module OpenXml
       doc = Nokogiri::XML(parts["word/document.xml"])
       doc.xpath("//w:t").each do |node|
         data.each do |k, v|
-          node.content = node.content.gsub(k, v.to_s) if node.content[/#{k}/]
+          node.content = node.content.gsub(k, Array(v).join("\n")) if node.content[/#{k}/]
         end
       end
 
