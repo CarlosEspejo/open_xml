@@ -8,10 +8,11 @@ Library for reading and writing to open xml documents (*but at the moment you ca
 * nokogiri
     
 ## Usage
-download lib and bin directories
+for now do a git clone and run the following
 
-```ruby
-ruby sample.rb
+```bash
+bundle
+ruby bin/sample.rb
 ```
 
 ## Todo
