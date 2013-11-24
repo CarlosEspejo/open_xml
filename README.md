@@ -20,5 +20,6 @@ ruby bin/sample.rb
   * ~~Create a template word document with formatted key words (bold, 14pt).~~
   * ~~Replace the key words with the supplied plain text content but maintain all the formatting.~~
   * ~~Handle replacing a key with multiple content~~
+  * Extract these features into a gem
   * Format html content for wordprocessingML e.x. bold, italic,
     underline
