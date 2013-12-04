@@ -19,7 +19,7 @@ Or install it yourself as:
 
    
 ## Usage
-Provide a path to a docx with the word [SUPERPOWER] placed anywhere.
+Provide a path to a docx with the text **[SUPERPOWER]** placed anywhere.
 
 ```ruby
 require 'open_xml'
