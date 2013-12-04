@@ -2,8 +2,6 @@ require 'zip'
 require 'nokogiri'
 
 module OpenXml
-
-
   class TemplateDocument
     attr_reader :template_path, :parts, :data
 
@@ -16,22 +14,22 @@ module OpenXml
 
     def to_zip_buffer
       Zip::OutputStream.write_buffer do |w|
-        parts.each do |k, v|
-          w.put_next_entry k
-          w.write v
+        parts.each do |key, value|
+          w.put_next_entry key
+          w.write value
         end
       end
     end
 
     def process
-      doc = Nokogiri::XML(parts["word/document.xml"])
-      doc.xpath("//w:t").each do |node|
-        data.each do |k, v|
-          node.content = node.content.gsub(k, Array(v).join("\n")) if node.content[/#{k}/]
+      doc = Nokogiri::XML(parts['word/document.xml'])
+      doc.xpath('//w:t').each do |node|
+        data.each do |key, value|
+          node.content = node.content.gsub(key, Array(value).join("\n")) if node.content[/#{key}/]
         end
       end
 
-      parts["word/document.xml"] = doc.to_xml
+      parts['word/document.xml'] = doc.to_xml
     end
 
     private
@@ -43,8 +41,5 @@ module OpenXml
 
       parts
     end
-
-
   end
-
 end
