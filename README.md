@@ -23,10 +23,9 @@ Provide a path to a docx with the word [SUPERPOWER] placed anywhere.
 
 ```ruby
 require 'open_xml'
-
 doc = OpenXml::TemplateDocument.new(path: "[path to template]", data: {"[SUPERPOWER]" => "Bug Fixing!!!!"})
 doc.process
-
+  
 IO.write "./powers.docx", doc.to_zip_buffer.string
 ```
 
@@ -35,6 +34,7 @@ IO.write "./powers.docx", doc.to_zip_buffer.string
   * ~~Create a template word document with formatted key words (bold, 14pt).~~
   * ~~Replace the key words with the supplied plain text content but maintain all the formatting.~~
   * ~~Handle replacing a key with multiple content~~
+  * Extract these features into a gem
   * Format html content for wordprocessingML e.x. bold, italic,
     underline
 
