@@ -1,10 +1,4 @@
 source 'https://rubygems.org'
 
-gem 'minitest'
-gem 'rake'
-gem 'nokogiri'
-gem 'rubyzip'
-
-group :development do
-  gem 'pry'
-end
+# Specify your gem's dependencies in open_xml.gemspec
+gemspec

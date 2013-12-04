@@ -1,14 +1,26 @@
-open_xml
+OpenXml
 ========
 
 Library for reading and writing to open xml documents (*but at the moment you can generate word docs from a template*)
 
-## Requirements
-* rubyzip
-* nokogiri
-    
+## Installation
+
+Add this line to your application's Gemfile:
+
+    gem 'open_xml'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install open_xml
+
+   
 ## Usage
 Provide a path to a docx with the word [SUPERPOWER] placed anywhere.
+
 ```ruby
 require 'open_xml'
 
@@ -25,3 +37,11 @@ IO.write "./powers.docx", doc.to_zip_buffer.string
   * ~~Handle replacing a key with multiple content~~
   * Format html content for wordprocessingML e.x. bold, italic,
     underline
+
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
