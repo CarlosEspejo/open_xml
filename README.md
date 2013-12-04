@@ -23,6 +23,7 @@ Provide a path to a docx with the word [SUPERPOWER] placed anywhere.
 
 ```ruby
 require 'open_xml'
+
 doc = OpenXml::TemplateDocument.new(path: "[path to template]", data: {"[SUPERPOWER]" => "Bug Fixing!!!!"})
 doc.process
   
