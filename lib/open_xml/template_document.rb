@@ -6,9 +6,9 @@ module OpenXml
     attr_reader :template_path, :parts, :data
 
     def initialize(options)
-      @template_path = options[:path]
-      @parts = {}
+      @template_path = options.fetch(:path)
       @data = options[:data]
+      @parts = {}
       split_parts
     end
 
@@ -25,7 +25,28 @@ module OpenXml
       doc = Nokogiri::XML(parts['word/document.xml'])
       doc.xpath('//w:t').each do |node|
         data.each do |key, value|
-          node.content = node.content.gsub(key, Array(value).join("\n")) if node.content[/#{key}/]
+
+          if node.content[/#{key}/]
+            values = Array(value)
+
+            if values.size > 1
+              values.each do |v|
+                br = Nokogiri::XML::Node.new 'w:br', doc
+                n = Nokogiri::XML::Node.new 'w:t', doc
+
+                n.content = v
+
+                node.parent << n
+                node.parent << br
+              end
+
+              node.remove
+            else
+              node.content = node.content.gsub(key, values.first) if values.first
+            end
+
+          end
+
         end
       end
 
