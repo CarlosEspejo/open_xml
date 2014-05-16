@@ -1,13 +1,13 @@
 require 'spec_helper'
 require 'tempfile'
 require 'nokogiri'
+require 'pry'
 
 describe TemplateDocument do
 
   it 'should read the template file and split it into parts' do
     t = TemplateDocument.new(path: template_path)
-    t.parts.keys.must_equal template_parts.keys
-
+    t.parts.keys.must_include 'word/document.xml'
   end
 
   it 'should create a new file from the template parts' do
@@ -24,22 +24,18 @@ describe TemplateDocument do
   end
 
   it 'should replace key words in the document xml' do
-    temp = Tempfile.new(['output', '.docx'])
+    t = TemplateDocument.new(path: template_path)
+    t.process({ 'person_name' => '<b>Carlos</b>', 'person_age' => 30 })
+    doc = Nokogiri::XML(t.parts['word/document.xml'])
 
-    t = TemplateDocument.new(path: template_path, data: { '[NAME]' => '<b>Carlos</b>', '[AGE]' => 30 })
-    t.process
-    IO.write temp.path, t.to_zip_buffer.string
-
-    processed = TemplateDocument.new(path: temp.path)
-    doc = Nokogiri::XML(processed.parts['word/document.xml'])
-
-    doc.xpath('//w:t').text[/\[NAME\]/].must_be_nil
-    doc.xpath('//w:t').text[/\[AGE\]/].must_be_nil
+    text = doc.xpath('//w:t').text
+    text[/Carlos/].wont_be_nil
+    text[/30/].wont_be_nil
   end
 
   it 'should replace one key word with many items' do
     data = {
-      '[LIST]' => [
+      'my_list' => [
                     'list 1',
                     'list 2',
                     'list 3',
@@ -48,32 +44,31 @@ describe TemplateDocument do
                   ]
     }
 
-    t = TemplateDocument.new(path: template_path, data: data)
-    t.process
+    t = TemplateDocument.new(path: template_path)
+    t.process(data)
+
     doc = Nokogiri::XML(t.parts['word/document.xml'])
 
     text = doc.xpath('//w:t').text
 
-    text[/list 1\nlist 2/].wont_be_nil
+    text[/list 2/].wont_be_nil
+  end
+
+  it "should cache the template document" do
+    t = TemplateDocument.new(path: template_path)
+    t.process({'person_name' => 'steve'})
+    doc = Nokogiri::XML(t.parts['word/document.xml'])
+
+    doc.text[/steve/].wont_be_nil
+
+    t.process({'person_name' => 'carlos'})
+    doc = Nokogiri::XML(t.parts['word/document.xml'])
+
+    doc.text[/carlos/].wont_be_nil
   end
 
   def template_path
     "#{File.expand_path('samples', File.dirname(__FILE__))}/template_sample.docx"
   end
 
-  def template_parts
-    {
-      '_rels/.rels' => '',
-      'docProps/core.xml' => '',
-      'docProps/app.xml' => '',
-      'word/document.xml' => '',
-      'word/styles.xml' => '',
-      'word/fontTable.xml' => '',
-      'word/header.xml' => '',
-      'word/footer.xml' => '',
-      'word/settings.xml' => '',
-      'word/_rels/document.xml.rels' => '',
-      '[Content_Types].xml' => ''
-    }
-  end
 end

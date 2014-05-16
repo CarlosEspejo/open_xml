@@ -3,11 +3,10 @@ require 'nokogiri'
 
 module OpenXml
   class TemplateDocument
-    attr_reader :template_path, :parts, :data
+    attr_reader :template_path, :parts
 
     def initialize(options)
       @template_path = options.fetch(:path)
-      @data = options[:data]
       @parts = {}
       split_parts
     end
@@ -21,7 +20,9 @@ module OpenXml
       end
     end
 
-    def process
+    def process(data)
+      @parts = @parts_cache.clone
+
       doc = Nokogiri::XML(parts['word/document.xml'])
       doc.xpath('//w:t').each do |node|
         data.each do |key, value|
@@ -34,7 +35,7 @@ module OpenXml
                 br = Nokogiri::XML::Node.new 'w:br', doc
                 n = Nokogiri::XML::Node.new 'w:t', doc
 
-                n.content = v
+                n.content = v.to_s
 
                 node.parent << n
                 node.parent << br
@@ -42,7 +43,7 @@ module OpenXml
 
               node.remove
             else
-              node.content = node.content.gsub(key, values.first) if values.first
+              node.content = node.content.gsub(key, values.first.to_s) if values.first
             end
 
           end
@@ -60,7 +61,7 @@ module OpenXml
         parts[f.name] = f.get_input_stream.read
       end
 
-      parts
+      @parts_cache = parts.clone
     end
   end
 end
