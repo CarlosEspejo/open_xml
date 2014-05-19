@@ -70,37 +70,37 @@ describe TemplateDocument do
     doc.text[/carlos/].wont_be_nil
   end
 
-  describe "Converting HTML to WordML" do
-    it "should convert <p> tags" do
-      t = TemplateDocument.new(path: report_path)
-      t.process({'my_content' => {text: '<p>This content should not have paragraph tags</p>', html: true}})
+  #describe "Converting HTML to WordML" do
+    #it "should convert <p> tags" do
+      #t = TemplateDocument.new(path: report_path)
+      #t.process({'my_content' => {text: '<p>This content should not have paragraph tags</p>', html: true}})
 
-      doc = Nokogiri::XML(t.parts['word/document.xml'])
-      text = doc.xpath('//w:p').text
-      text[/<p>/].must_be_nil
-      text[/This content should/].wont_be_nil
-    end
+      #doc = Nokogiri::XML(t.parts['word/document.xml'])
+      #text = doc.xpath('//w:p').text
+      #text[/<p>/].must_be_nil
+      #text[/This content should/].wont_be_nil
+    #end
 
-    it "should convert a list of <p> tags" do
-      t = TemplateDocument.new(path: report_path)
+    #it "should convert a list of <p> tags" do
+      #t = TemplateDocument.new(path: report_path)
 
-      data = {
-                'my_content' => {text: [
-                    '<p>list 1</p>',
-                    '<p>list 2</p>',
-                    '<p>list 3</p>',
-                    '<p>list 4</p>',
-                    '<p>list 5</p>'
-                  ], html: true}
-       }
+      #data = {
+                #'my_content' => {text: [
+                    #'<p>list 1</p>',
+                    #'<p>list 2</p>',
+                    #'<p>list 3</p>',
+                    #'<p>list 4</p>',
+                    #'<p>list 5</p>'
+                  #], html: true}
+       #}
 
-      t.process(data)
-      doc = Nokogiri::XML(t.parts['word/document.xml'])
+      #t.process(data)
+      #doc = Nokogiri::XML(t.parts['word/document.xml'])
 
-      text = doc.xpath('//w:p').text
-      text[/<p>/].must_be_nil
-      text[/list 4/].wont_be_nil
-    end
+      #text = doc.xpath('//w:p').text
+      #text[/<p>/].must_be_nil
+      #text[/list 4/].wont_be_nil
+    #end
 
-  end
+  #end
 end

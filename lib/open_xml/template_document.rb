@@ -3,11 +3,10 @@ require 'nokogiri'
 
 module OpenXml
   class TemplateDocument
-    attr_reader :template_path, :parts, :xslt
+    attr_reader :template_path, :parts
 
     def initialize(options)
       @template_path = options.fetch(:path)
-      @xslt = options.fetch(:xslt){File.expand_path('../xslt/basic_html.xslt', File.dirname(__FILE__))}
       @parts = {}
 
       read_files
@@ -64,13 +63,29 @@ module OpenXml
 
     def process_html(node, key, value, doc)
       Array(value[:text]).each do |v|
-        html = Nokogiri::HTML(v)
-        new_value = xslt.transform(html).children.first
-
-        node.parent.parent << new_value
+        node.parent.parent.add_next_sibling create_chunk_file(key, v, doc)
       end
 
-      node.remove
+      #node.remove
+    end
+
+    def create_chunk_file(key, content, doc)
+      key = 'mycontent'
+      parts["word/afchunk.xhtml"] = "<html><head/><body>#{content}</body></html>"
+      #<Relationship Id="AltChunkId1" Target="/word/afchunk.xhtml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk"/>
+
+      relationships = Nokogiri::XML(parts['word/_rels/document.xml.rels'])
+      rel = Nokogiri::XML::Node.new 'Relationship', doc
+      rel['Id'] = key
+      rel['Target'] = "word/afchunk.xhtml"
+      rel['Type'] = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk'
+      relationships.at_xpath('//xmlns:Relationships') << rel
+
+      parts['word/_rels/document.xml.rels'] = relationships.to_xml(indent: 0).gsub("\n", "")
+      #binding.pry
+      chunk = Nokogiri::XML::Node.new 'w:altChunk', doc
+      chunk['r:id'] = key
+      chunk
     end
 
     def read_files
@@ -78,7 +93,6 @@ module OpenXml
         parts[f.name] = f.get_input_stream.read
       end
 
-      @xslt = Nokogiri::XSLT(File.read(xslt))
       @parts_cache = parts.clone
     end
   end
