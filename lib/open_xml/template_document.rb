@@ -62,27 +62,32 @@ module OpenXml
     end
 
     def process_html(node, key, value, doc)
+      # move this into its own method
+      content = Nokogiri::XML(parts['[Content_Types].xml'])
+      type = Nokogiri::XML::Node.new 'Default', content
+      type['ContentType'] = 'application/xhtml+xml'
+      type['Extension'] = 'xhtml'
+      content.at_xpath('//xmlns:Default').add_next_sibling type
+      parts['[Content_Types].xml'] = content.to_xml(indent: 0).gsub("\n","")
+
       Array(value[:text]).each do |v|
         node.parent.parent.add_next_sibling create_chunk_file(key, v, doc)
       end
 
-      #node.remove
+      node.remove
     end
 
     def create_chunk_file(key, content, doc)
-      key = 'mycontent'
-      parts["word/afchunk.xhtml"] = "<html><head/><body>#{content}</body></html>"
-      #<Relationship Id="AltChunkId1" Target="/word/afchunk.xhtml" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk"/>
+      parts["word/#{key}.xhtml"] = "<html><body>#{content}</body></html>"
 
       relationships = Nokogiri::XML(parts['word/_rels/document.xml.rels'])
-      rel = Nokogiri::XML::Node.new 'Relationship', doc
+      rel = Nokogiri::XML::Node.new 'Relationship', relationships
       rel['Id'] = key
-      rel['Target'] = "word/afchunk.xhtml"
       rel['Type'] = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk'
+      rel['Target'] = "/word/#{key}.xhtml"
       relationships.at_xpath('//xmlns:Relationships') << rel
 
       parts['word/_rels/document.xml.rels'] = relationships.to_xml(indent: 0).gsub("\n", "")
-      #binding.pry
       chunk = Nokogiri::XML::Node.new 'w:altChunk', doc
       chunk['r:id'] = key
       chunk
