@@ -16,6 +16,6 @@ describe "Adding HTML through the alternate chunk feature" do
     doc = Nokogiri::XML(t.parts['word/_rels/document.xml.rels'])
     doc.xpath('//xmlns:Relationship/@Id').map{|n| n.text}.must_include 'my_content'
 
-    #IO.write 'test.docx', t.to_zip_buffer.string
+    binding.pry
   end
 end

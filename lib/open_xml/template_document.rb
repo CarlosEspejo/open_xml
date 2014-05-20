@@ -23,6 +23,7 @@ module OpenXml
 
     def process(data)
       @parts = @parts_cache.clone
+      register_type 'application/xhtml+xml', 'xhtml'
 
       doc = Nokogiri::XML(parts['word/document.xml'])
       doc.xpath('//w:t').each do |node|
@@ -36,7 +37,7 @@ module OpenXml
         end
       end
 
-      parts['word/document.xml'] = doc.to_xml(:indent => 0).gsub("\n","")
+      parts['word/document.xml'] = to_flat_xml doc
     end
 
     private
@@ -62,16 +63,8 @@ module OpenXml
     end
 
     def process_html(node, key, value, doc)
-      # move this into its own method
-      content = Nokogiri::XML(parts['[Content_Types].xml'])
-      type = Nokogiri::XML::Node.new 'Default', content
-      type['ContentType'] = 'application/xhtml+xml'
-      type['Extension'] = 'xhtml'
-      content.at_xpath('//xmlns:Default').add_next_sibling type
-      parts['[Content_Types].xml'] = content.to_xml(indent: 0).gsub("\n","")
-
       Array(value[:text]).each do |v|
-        node.parent.parent.add_next_sibling create_chunk_file(key, v, doc)
+        node.parent.parent.add_previous_sibling create_chunk_file(key, v, doc)
       end
 
       node.remove
@@ -79,18 +72,36 @@ module OpenXml
 
     def create_chunk_file(key, content, doc)
       parts["word/#{key}.xhtml"] = "<html><body>#{content}</body></html>"
+      add_relation key
 
-      relationships = Nokogiri::XML(parts['word/_rels/document.xml.rels'])
-      rel = Nokogiri::XML::Node.new 'Relationship', relationships
-      rel['Id'] = key
-      rel['Type'] = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk'
-      rel['Target'] = "/word/#{key}.xhtml"
-      relationships.at_xpath('//xmlns:Relationships') << rel
-
-      parts['word/_rels/document.xml.rels'] = relationships.to_xml(indent: 0).gsub("\n", "")
       chunk = Nokogiri::XML::Node.new 'w:altChunk', doc
       chunk['r:id'] = key
       chunk
+    end
+
+    def add_relation(id)
+      relationships = Nokogiri::XML(parts['word/_rels/document.xml.rels'])
+      rel = Nokogiri::XML::Node.new 'Relationship', relationships
+      rel['Id'] = id
+      rel['Type'] = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk'
+      rel['Target'] = "/word/#{id}.xhtml"
+
+      relationships.at_xpath('//xmlns:Relationships') << rel
+      parts['word/_rels/document.xml.rels'] = to_flat_xml relationships
+    end
+
+    def register_type(type, extension)
+      content = Nokogiri::XML(parts['[Content_Types].xml'])
+      node = Nokogiri::XML::Node.new 'Default', content
+      node['ContentType'] = type
+      node['Extension'] = extension
+
+      content.at_xpath('//xmlns:Default').add_next_sibling node
+      parts['[Content_Types].xml'] = to_flat_xml content
+    end
+
+    def to_flat_xml(doc)
+      doc.to_xml(indent: 0).gsub("\n","")
     end
 
     def read_files
