@@ -63,19 +63,25 @@ module OpenXml
     end
 
     def process_html(node, key, value, doc)
-      Array(value[:text]).each do |v|
-        node.parent.parent.add_previous_sibling create_chunk_file(key, v, doc)
+      previous_sibling = node.parent.parent
+
+      Array(value[:text]).each_with_index do |v, index|
+        new_node = create_chunk_file(key, v, doc, index + 1)
+        previous_sibling.add_next_sibling new_node
+        previous_sibling = new_node
       end
 
       node.remove
     end
 
-    def create_chunk_file(key, content, doc)
-      parts["word/#{key}.xhtml"] = "<html><body>#{content}</body></html>"
-      add_relation key
+    def create_chunk_file(key, content, doc, index)
+      id = "#{key}#{index}"
+
+      parts["word/#{id}.xhtml"] = "<html><body>#{content}</body></html>"
+      add_relation id
 
       chunk = Nokogiri::XML::Node.new 'w:altChunk', doc
-      chunk['r:id'] = key
+      chunk['r:id'] = id
       chunk
     end
 
