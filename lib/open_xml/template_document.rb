@@ -24,6 +24,7 @@ module OpenXml
     def process(data)
       @parts = @parts_cache.clone
       register_type 'application/xhtml+xml', 'xhtml'
+      register_type 'message/rfc822', 'mht'
 
       doc = Nokogiri::XML(parts['word/document.xml'])
       doc.xpath('//w:t').each do |node|
@@ -77,7 +78,8 @@ module OpenXml
     def create_chunk_file(key, content, doc, index)
       id = "#{key}#{index}"
 
-      parts["word/#{id}.xhtml"] = "<html><body>#{content}</body></html>"
+      #parts["word/#{id}.xhtml"] = "<html><body>#{content}</body></html>"
+      parts["word/#{id}.mht"] = "<html><body>#{content}</body></html>"
       add_relation id
 
       chunk = Nokogiri::XML::Node.new 'w:altChunk', doc
@@ -90,7 +92,10 @@ module OpenXml
       rel = Nokogiri::XML::Node.new 'Relationship', relationships
       rel['Id'] = id
       rel['Type'] = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk'
-      rel['Target'] = "/word/#{id}.xhtml"
+
+      #rel['Target'] = "/word/#{id}.xhtml"
+      rel['Target'] = "/word/#{id}.mht"
+
 
       relationships.at_xpath('//xmlns:Relationships') << rel
       parts['word/_rels/document.xml.rels'] = to_flat_xml relationships
