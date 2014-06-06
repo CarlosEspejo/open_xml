@@ -23,7 +23,6 @@ module OpenXml
 
     def process(data)
       @parts = @parts_cache.clone
-      register_type 'application/xhtml+xml', 'xhtml'
       register_type 'message/rfc822', 'mht'
 
       doc = Nokogiri::XML(parts['word/document.xml'])
@@ -79,7 +78,7 @@ module OpenXml
       id = "#{key}#{index}"
 
       #parts["word/#{id}.xhtml"] = "<html><body>#{content}</body></html>"
-      parts["word/#{id}.mht"] = "<html><body>#{content}</body></html>"
+      parts["word/#{id}.mht"] = mht_default_text
       add_relation id
 
       chunk = Nokogiri::XML::Node.new 'w:altChunk', doc
@@ -92,10 +91,7 @@ module OpenXml
       rel = Nokogiri::XML::Node.new 'Relationship', relationships
       rel['Id'] = id
       rel['Type'] = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/aFChunk'
-
-      #rel['Target'] = "/word/#{id}.xhtml"
       rel['Target'] = "/word/#{id}.mht"
-
 
       relationships.at_xpath('//xmlns:Relationships') << rel
       parts['word/_rels/document.xml.rels'] = to_flat_xml relationships
@@ -122,5 +118,55 @@ module OpenXml
 
       @parts_cache = parts.clone
     end
+
+    def mht_default_text
+      path = '/Users/carlos/Pictures/mac_vim_icon_dark.png'
+      encoded_image = Base64.encode64(File.read(path))
+
+      message =<<MESSAGE
+MIME-Version: 1.0
+Content-Type: multipart/related; boundary=boundary-example-1
+
+--boundary-example-1
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html>
+  <body>
+    <div class="image-meta">
+      <h2>Epson Smartcanvas</h2>
+
+      <span class="caption"><p>New for this year, Epson's Smart Canvas watch gets a little artistic with its design.</p></span>
+
+
+
+    <p class="credits">
+                <time datetime="2014-06-05 15:23:00">June 5, 2014 8:23 AM PDT</time><span class="credit">
+                        <strong>Photo by:</strong> Nic Healey/CNET
+    <strong> /  Caption by:</strong> <a rel="author" href="/profiles/nichealey/" itemprop="name">Nic Healey</a>                                                            </span>
+    </p>
+    <p>
+      <table border=3>
+      <tr><td>1</td><td>2</td></tr>
+      <tr><td>3</td><td>4</td></tr>
+      </table>
+    </p>
+  </div>
+    <img src='my_image.png' />
+  </body>
+</html>
+
+--boundary-example-1
+Content-Location: my_image.png
+Content-Transfer-Encoding: Base64
+
+#{encoded_image}
+
+--boundary-example-1--
+MESSAGE
+
+      message
+    end
+
   end
 end
