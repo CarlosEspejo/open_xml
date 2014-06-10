@@ -37,7 +37,7 @@ IO.write "./powers.docx", doc.to_zip_buffer.string
   * ~~Handle replacing a key with multiple content~~
   * ~~Extract these features into a gem~~
   * Format html content for wordprocessingML e.x. bold, italic,
-    underline
+    underline and handle images (currently in development)
 
 ## Contributing
 
