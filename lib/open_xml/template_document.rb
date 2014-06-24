@@ -120,7 +120,7 @@ module OpenXml
     end
 
     def mht_default_text
-      path = '/Users/carlos/Pictures/mac_vim_icon_dark.png'
+      path = '/Users/cespejo/Pictures/mac_vim_icon_dark.png'
       encoded_image = Base64.encode64(File.read(path))
 
       message =<<MESSAGE
