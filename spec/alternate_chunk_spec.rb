@@ -1,37 +1,44 @@
 require 'spec_helper'
+require 'base64'
 
-describe "Adding HTML through the alternate chunk feature" do
+describe "Adding HTML and Images through the alternate chunk feature" do
 
-  let(:report_path){"#{File.expand_path('samples', File.dirname(__FILE__))}/report.docx"}
+  let(:report_path){"#{File.expand_path('samples', __dir__)}/report.docx"}
+  let(:encoded_img){Base64.encode64(File.read("#{File.expand_path('samples', __dir__)}/caterpillar.jpg"))}
 
-  it "should generate chunk file" do
-    t = TemplateDocument.new(path: report_path)
-    t.process 'my_content' => {text: '<u>This is underlined</u>', html: true}
-    t.parts['word/my_content1.xhtml'].must_equal '<html><body><u>This is underlined</u></body></html>'
+  let(:t){TemplateDocument.new(path: report_path)}
+
+  it "should register MIME html type" do
+    t.process 'my_content' => {text: 'empty', html: true}
+    doc = Nokogiri::XML(t.parts['[Content_Types].xml'])
+    doc.xpath('//xmlns:Default/@ContentType').map(&:value).must_include 'message/rfc822'
   end
 
-  it "should add chunk file to document relationship file" do
-    t = TemplateDocument.new(path: report_path)
-    t.process 'my_content' => {text: '<u>This is underlined</u>', html: true}
+  it "should add the chunk id to the rels file" do
+    t.process 'my_content' => {text: 'empty', html: true}
     doc = Nokogiri::XML(t.parts['word/_rels/document.xml.rels'])
-    doc.xpath('//xmlns:Relationship/@Id').map{|n| n.text}.must_include 'my_content1'
+    doc.xpath('//xmlns:Relationship/@Id').map(&:value).must_include 'my_content'
   end
 
-  it "should convert a list of <p> tags" do
-      t = TemplateDocument.new(path: report_path)
+  it "should generate MIME html file" do
+    t.process 'my_content' => {text: '<u>This is underlined</u>', html: true}
+    t.parts['word/my_content.mht'].must_match(/#{'<u>This is underlined</u>'}/)
+  end
 
-      data = {
-                'my_content' => {text: [
-                    '<p>list 1</p>',
-                    '<p>list 2</p>',
-                    '<p>list 3</p>',
-                    '<p>list 4</p>',
-                    '<p>list 5</p>'
-                  ], html: true}
-       }
+  it "should generate MIME html file with a image" do
+    content = '<h1>Look at the image</h1><img src="./image.jpg" />'
 
-      t.process(data)
-      t.parts['word/my_content4.xhtml'][/list 4/].wont_be_nil
-    end
+    t.process 'my_content' => {text: content, html: true, images: {"./image.jpg" => encoded_img}}
+    t.parts['word/my_content.mht'].must_match(/#{'Content-Location: ./image.jpg'}/)
+  end
+
+  it "should geneate MIME html file with multiple images" do
+    content = '<h1>Look at the images</h1>'
+    content << '<img src="/image.jpg" /><br/><br/><img src="/image2.jpg" />'
+    t.process 'my_content' => {text: content, html: true, images: {"/image.jpg" => encoded_img, '/image2.jpg' => encoded_img}}
+    t.parts['word/my_content.mht'].must_match(/#{'Content-Location: /image.jpg'}/)
+    t.parts['word/my_content.mht'].must_match(/#{'Content-Location: /image2.jpg'}/)
+    IO.write File.expand_path('~/Downloads/test.docx'), t.to_zip_buffer.string
+  end
 
 end

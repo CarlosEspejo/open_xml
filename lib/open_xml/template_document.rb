@@ -37,7 +37,7 @@ module OpenXml
         end
       end
 
-      parts['word/document.xml'] = to_flat_xml doc
+      parts['word/document.xml'] = flatten_xml doc
     end
 
     private
@@ -63,22 +63,15 @@ module OpenXml
     end
 
     def process_html(node, key, value, doc)
-      previous_sibling = node.parent.parent
-
-      Array(value[:text]).each_with_index do |v, index|
-        new_node = create_chunk_file(key, v, doc, index + 1)
-        previous_sibling.add_next_sibling new_node
-        previous_sibling = new_node
-      end
-
+      new_node = create_chunk_file(key, value, doc)
+      node.parent.parent.add_next_sibling new_node
       node.remove
     end
 
-    def create_chunk_file(key, content, doc, index)
-      id = "#{key}#{index}"
+    def create_chunk_file(key, content, doc)
+      id = key
 
-      #parts["word/#{id}.xhtml"] = "<html><body>#{content}</body></html>"
-      parts["word/#{id}.mht"] = mht_default_text
+      parts["word/#{id}.mht"] = build_mht(content)
       add_relation id
 
       chunk = Nokogiri::XML::Node.new 'w:altChunk', doc
@@ -94,7 +87,7 @@ module OpenXml
       rel['Target'] = "/word/#{id}.mht"
 
       relationships.at_xpath('//xmlns:Relationships') << rel
-      parts['word/_rels/document.xml.rels'] = to_flat_xml relationships
+      parts['word/_rels/document.xml.rels'] = flatten_xml relationships
     end
 
     def register_type(type, extension)
@@ -104,10 +97,10 @@ module OpenXml
       node['Extension'] = extension
 
       content.at_xpath('//xmlns:Default').add_next_sibling node
-      parts['[Content_Types].xml'] = to_flat_xml content
+      parts['[Content_Types].xml'] = flatten_xml content
     end
 
-    def to_flat_xml(doc)
+    def flatten_xml(doc)
       doc.to_xml(indent: 0).gsub("\n","")
     end
 
@@ -119,53 +112,38 @@ module OpenXml
       @parts_cache = parts.clone
     end
 
-    def mht_default_text
-      path = '/Users/cespejo/Pictures/mac_vim_icon_dark.png'
-      encoded_image = Base64.encode64(File.read(path))
-
+    def build_mht(content)
       message =<<MESSAGE
 MIME-Version: 1.0
-Content-Type: multipart/related; boundary=boundary-example-1
+Content-Type: multipart/related; boundary=MY-SEPARATOR
 
---boundary-example-1
+--MY-SEPARATOR
 Content-Type: text/html; charset=utf-8
 Content-Transfer-Encoding: 8bit
 
-<html>
-  <body>
-    <div class="image-meta">
-      <h2>Epson Smartcanvas</h2>
+#{content[:text]}
 
-      <span class="caption"><p>New for this year, Epson's Smart Canvas watch gets a little artistic with its design.</p></span>
-
-
-
-    <p class="credits">
-                <time datetime="2014-06-05 15:23:00">June 5, 2014 8:23 AM PDT</time><span class="credit">
-                        <strong>Photo by:</strong> Nic Healey/CNET
-    <strong> /  Caption by:</strong> <a rel="author" href="/profiles/nichealey/" itemprop="name">Nic Healey</a>                                                            </span>
-    </p>
-    <p>
-      <table border=3>
-      <tr><td>1</td><td>2</td></tr>
-      <tr><td>3</td><td>4</td></tr>
-      </table>
-    </p>
-  </div>
-    <img src='my_image.png' />
-  </body>
-</html>
-
---boundary-example-1
-Content-Location: my_image.png
-Content-Transfer-Encoding: Base64
-
-#{encoded_image}
-
---boundary-example-1--
 MESSAGE
 
+
+      content.fetch(:images){{}}.each do |key, value|
+      message << img_template(key, value)
+     end
+
+      message << "\n--MY-SEPARATOR--"
       message
+    end
+
+    def img_template(key, value)
+      <<IMG
+
+--MY-SEPARATOR
+Content-Location: #{key}
+Content-Transfer-Encoding: Base64
+
+#{value}
+
+IMG
     end
 
   end
