@@ -38,7 +38,6 @@ describe "Adding HTML and Images through the alternate chunk feature" do
     t.process 'my_content' => {text: content, html: true, images: {"/image.jpg" => encoded_img, '/image2.jpg' => encoded_img}}
     t.parts['word/my_content.mht'].must_match(/#{'Content-Location: /image.jpg'}/)
     t.parts['word/my_content.mht'].must_match(/#{'Content-Location: /image2.jpg'}/)
-    IO.write File.expand_path('~/Downloads/test.docx'), t.to_zip_buffer.string
   end
 
 end
