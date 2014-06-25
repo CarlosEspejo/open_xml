@@ -1,7 +1,7 @@
 OpenXml
 ========
 
-Library for reading and writing to open xml documents (*but at the moment you can generate word docs from a template*)
+A ruby library for generating word documents that can handle basic html and images too.
 
 ## Installation
 
@@ -51,7 +51,7 @@ doc.process({"[SUPERPOWER]" => {text: "<img src='/powers.png' />", html: true, i
   * ~~Handle replacing a key with multiple content~~
   * ~~Extract these features into a gem~~
   * ~~Format html content for wordprocessingML e.x. bold, italic,
-    underline~~
+    underline and handle images~~
 
 ## Contributing
 

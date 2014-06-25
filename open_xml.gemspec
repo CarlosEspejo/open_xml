@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = OpenXml::VERSION
   spec.authors       = ["Carlos Espejo"]
   spec.email         = ["carlosespejo@gmail.com"]
-  spec.description   = %q{Currently you can only generate word documents from a template word document.}
-  spec.summary       = %q{Library for reading and writing to open xml documents (*but at the moment you can generate word docs from a template*)}
+  spec.description   = %q{Generate Word documents from a template, also handle html and images too.}
+  spec.summary       = %q{A ruby library for generating word documents that can handle basic html and images too.}
   spec.homepage      = "https://github.com/CarlosEspejo/open_xml"
   spec.license       = "MIT"
 
