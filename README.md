@@ -17,17 +17,31 @@ Or install it yourself as:
 
     $ gem install open_xml
 
-   
+
 ## Usage
 Provide a path to a docx with the text **[SUPERPOWER]** placed anywhere.
 
 ```ruby
 require 'open_xml'
 
-doc = OpenXml::TemplateDocument.new(path: "[path to template]", data: {"[SUPERPOWER]" => "Bug Fixing!!!!"})
-doc.process
-  
+doc = OpenXml::TemplateDocument.new(path: "[path to template]")
+doc.process({"[SUPERPOWER]" => {text: "Bug Fixing!!!!"}})
+
 IO.write "./powers.docx", doc.to_zip_buffer.string
+```
+
+HTML content
+
+```ruby
+doc = OpenXml::TemplateDocument.new(path: "[path to template]")
+doc.process({"[SUPERPOWER]" => {text: "<h1>Bug Fixing!!!!</h1>", html: true}})
+```
+
+HTML with images
+
+```ruby
+doc = OpenXml::TemplateDocument.new(path: "[path to template]")
+doc.process({"[SUPERPOWER]" => {text: "<img src='/powers.png' />", html: true, images: {'/powers.png' => "[Base64 encoded image]"}}})
 ```
 
 ## Todo
@@ -36,8 +50,8 @@ IO.write "./powers.docx", doc.to_zip_buffer.string
   * ~~Replace the key words with the supplied plain text content but maintain all the formatting.~~
   * ~~Handle replacing a key with multiple content~~
   * ~~Extract these features into a gem~~
-  * Format html content for wordprocessingML e.x. bold, italic,
-    underline
+  * ~~Format html content for wordprocessingML e.x. bold, italic,
+    underline~~
 
 ## Contributing
 

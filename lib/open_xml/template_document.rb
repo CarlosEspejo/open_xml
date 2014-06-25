@@ -127,8 +127,8 @@ MESSAGE
 
 
       content.fetch(:images){{}}.each do |key, value|
-      message << img_template(key, value)
-     end
+        message << img_template(key, value)
+      end
 
       message << "\n--MY-SEPARATOR--"
       message
