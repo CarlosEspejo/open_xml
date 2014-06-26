@@ -1,3 +1,7 @@
+## v0.1.1
+* When provided content is empty, the parent paragraph node of the
+  keyword is always removed.
+
 ## v0.1.0
 * API Change!!! the template document is now created once and the data
 is passed in through the process call. This allows you to loop over
