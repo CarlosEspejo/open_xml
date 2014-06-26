@@ -59,13 +59,14 @@ module OpenXml
         node.remove
       else
         node.content = node.content.gsub(key, values.first.to_s) if values.first
+        node.parent.parent.remove if value[:text].to_s.empty?
       end
     end
 
     def process_html(node, key, value, doc)
       new_node = create_chunk_file(key, value, doc)
       node.parent.parent.add_next_sibling new_node
-      node.remove
+      node.parent.parent.remove
     end
 
     def create_chunk_file(key, content, doc)
